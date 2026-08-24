@@ -1,0 +1,19 @@
+{% comment %}
+MetricCard primitive -- a small aggregate summary number (dashboard only).
+Never used per-record; financial records stay in tables (see Table).
+
+Usage:
+    {% include "components/data/metric_card.html" with label="Total Sekolah" value=metrics.total_schools %}
+    {% include "components/data/metric_card.html" with label="Sekolah di Branch Anda" value=metrics.total_schools supporting="Dari 20 sekolah" %}
+
+Params:
+    label        (required) eyebrow text
+    value        (required) the number/short text to display
+    supporting   optional secondary line under the value
+    title        optional `title=""` tooltip text for the value (used for TBD/OBD notes)
+{% endcomment %}
+<div class="metric-card">
+    <div class="metric-label">{{ label }}</div>
+    <div class="metric-value"{% if title %} title="{{ title }}"{% endif %}>{{ value }}</div>
+    {% if supporting %}<div class="mt-0.5 text-xs text-muted">{{ supporting }}</div>{% endif %}
+</div>

@@ -1,0 +1,48 @@
+{% extends "base/base.html" %}
+{% load monitoring_extras %}
+
+{% block title %}BOS | Monitoring Keuangan Sekolah{% endblock %}
+{% block page_heading %}BOS{% endblock %}
+
+{% block content %}
+{% url 'bos:create' as create_url %}
+<div class="page-header-row">
+    {% include "components/layout/page_header.html" with title="BOS" description="Data dana Bantuan Operasional Sekolah." %}
+    {% if is_branch %}
+    {% include "components/primitives/button.html" with label="Tambah Data BOS" href=create_url %}
+    {% endif %}
+</div>
+
+<div class="table-wrap">
+    <table class="table-base">
+        <thead>
+            <tr>
+                <th class="px-4 py-2 font-medium">Sekolah</th>
+                <th class="px-4 py-2 font-medium">Tahun Anggaran</th>
+                <th class="px-4 py-2 font-medium text-right">Saldo Awal</th>
+                <th class="px-4 py-2 font-medium text-right">Penerimaan</th>
+                <th class="px-4 py-2 font-medium text-right">Penggunaan</th>
+                <th class="px-4 py-2 font-medium text-right">Saldo Akhir (kalkulasi)</th>
+                <th class="px-4 py-2 font-medium">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in page_obj %}
+            <tr>
+                <td class="px-4 py-2 font-medium text-ink">{{ item.school.name }}</td>
+                <td class="px-4 py-2 text-muted">{{ item.budget_year.name }}</td>
+                <td class="px-4 py-2 text-right tabular-nums">{{ item.opening_balance|rupiah }}</td>
+                <td class="px-4 py-2 text-right tabular-nums">{{ item.receipt_amount|rupiah }}</td>
+                <td class="px-4 py-2 text-right tabular-nums">{{ item.usage_amount|rupiah }}</td>
+                <td class="px-4 py-2 text-right font-semibold tabular-nums">{{ item.ending_balance|rupiah }}</td>
+                <td class="px-4 py-2"><a href="{% url 'bos:edit' item.pk %}" class="link">Ubah</a></td>
+            </tr>
+            {% empty %}
+            <tr><td class="table-empty" colspan="7">Belum ada data BOS.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "components/navigation/pagination.html" %}
+{% endblock %}

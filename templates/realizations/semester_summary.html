@@ -1,0 +1,43 @@
+{% extends "base/base.html" %}
+{% load monitoring_extras %}
+
+{% block title %}Ringkasan Semester | Monitoring Keuangan Sekolah{% endblock %}
+{% block page_heading %}Ringkasan Semester &mdash; {{ school.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header-row">
+    {% include "components/layout/page_header.html" with title="Ringkasan Semester" description=school.name %}
+</div>
+<div class="panel p-6 max-w-2xl">
+    <div class="border-l-2 border-l-primary/30 pl-4 mb-5">
+        <div class="eyebrow">Total Realisasi (kalkulasi)</div>
+        <div class="mt-1 text-2xl font-semibold tabular-nums text-primary">{{ summary.total_realization|rupiah }}</div>
+    </div>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+        <div>
+            <div class="eyebrow">Semester 1</div>
+            <div class="mt-1 tabular-nums text-ink">{{ summary.semester_1|rupiah }}</div>
+        </div>
+        <div>
+            <div class="eyebrow">Semester 2</div>
+            <div class="mt-1 tabular-nums text-ink">{{ summary.semester_2|rupiah }}</div>
+        </div>
+        <div>
+            <div class="eyebrow">RKAS Terakhir</div>
+            <div class="mt-1 tabular-nums text-ink">{{ summary.latest_rkas|rupiah }}</div>
+        </div>
+        <div>
+            <div class="eyebrow">Sisa Anggaran (kalkulasi)</div>
+            <div class="mt-1 tabular-nums text-ink">{{ summary.remaining_budget|rupiah }}</div>
+        </div>
+        <div>
+            <div class="eyebrow">% Semester 1 (kalkulasi)</div>
+            <div class="mt-1 tabular-nums text-ink">{% if summary.percentage_semester_1 is not None %}{{ summary.percentage_semester_1|floatformat:1 }}%{% else %}&ndash;{% endif %}</div>
+        </div>
+        <div>
+            <div class="eyebrow">% Akhir (kalkulasi)</div>
+            <div class="mt-1 tabular-nums text-ink">{% if summary.percentage_final is not None %}{{ summary.percentage_final|floatformat:1 }}%{% else %}&ndash;{% endif %}</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

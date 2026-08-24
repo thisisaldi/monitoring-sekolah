@@ -1,0 +1,7 @@
+from django.apps import AppConfig
+
+
+class BosConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.bos"
+    label = "bos"

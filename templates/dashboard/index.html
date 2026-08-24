@@ -1,0 +1,114 @@
+{% extends "base/base.html" %}
+{% load monitoring_extras %}
+
+{% block title %}Dashboard | Monitoring Keuangan Sekolah{% endblock %}
+{% block page_heading %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header-row">
+    <div>
+        <h2 class="page-title">Dashboard</h2>
+        <p class="page-description">{% if is_central %}Ringkasan monitoring seluruh cabang dan sekolah.{% else %}Ringkasan monitoring untuk cabang dan sekolah Anda.{% endif %}</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+    {% if is_central %}
+    {% include "components/data/metric_card.html" with label="Jumlah Sekolah" value=metrics.total_schools %}
+    {% include "components/data/metric_card.html" with label="Jumlah Branch" value=metrics.total_branches %}
+    {% else %}
+    {% include "components/data/metric_card.html" with label="Sekolah di Branch Anda" value=metrics.total_schools %}
+    {% endif %}
+    {% if metrics.monthly_incomplete_count is not None %}
+    {% include "components/data/metric_card.html" with label="Laporan Bulanan Belum Lengkap" value=metrics.monthly_incomplete_count title="Definisi &quot;lengkap&quot; belum ditentukan oleh bisnis (OBD-DM-006)" %}
+    {% else %}
+    {% include "components/data/metric_card.html" with label="Laporan Bulanan Belum Lengkap" value="Belum ditentukan" title="Definisi &quot;lengkap&quot; belum ditentukan oleh bisnis (OBD-DM-006)" %}
+    {% endif %}
+    {% if metrics.reconciliation_problem_count is not None %}
+    {% include "components/data/metric_card.html" with label="Rekonsiliasi Bermasalah" value=metrics.reconciliation_problem_count %}
+    {% else %}
+    {% include "components/data/metric_card.html" with label="Rekonsiliasi Bermasalah" value="–" %}
+    {% endif %}
+    {% include "components/data/metric_card.html" with label="Temuan Terbuka" value=metrics.open_findings_count %}
+</div>
+
+<form method="get" class="filter-bar mb-5">
+    <div class="section-title mb-3">Filter Monitoring</div>
+    <div class="flex flex-wrap items-end gap-3">
+    {% if branches %}
+    <span class="flex flex-col gap-1">
+        <label for="filter-branch-trigger" class="text-xs text-muted">Branch</label>
+        {% include "components/primitives/select.html" with id="filter-branch" name="branch" placeholder="Semua Branch" options=branches|as_select_options selected=selected_branch.pk %}
+    </span>
+    {% endif %}
+    {% if is_central %}
+    <span class="flex flex-col gap-1">
+        <label for="filter-school-trigger" class="text-xs text-muted">Sekolah</label>
+        {% include "components/primitives/select.html" with id="filter-school" name="school" placeholder="Semua Sekolah" options=filter_schools|as_select_options selected=selected_school.pk %}
+    </span>
+    {% endif %}
+    <span class="flex flex-col gap-1">
+        <label for="filter-budget_year-trigger" class="text-xs text-muted">Tahun Anggaran</label>
+        {% include "components/primitives/select.html" with id="filter-budget_year" name="budget_year" placeholder="Pilih Tahun Anggaran" options=budget_years|as_select_options selected=budget_year.pk no_clear=True %}
+    </span>
+    {% include "components/primitives/button.html" with label="Terapkan" variant="secondary" type="submit" %}
+    </div>
+</form>
+
+<h2 class="section-title mb-3">Monitoring per Sekolah</h2>
+{% if not budget_year %}
+<p class="text-sm text-muted mb-4">Pilih Tahun Anggaran untuk melihat status RKAS dan rekonsiliasi per sekolah.</p>
+{% endif %}
+<div class="table-wrap">
+    <table class="table-base">
+        <thead>
+            <tr>
+                <th class="px-4 py-2 font-medium">Sekolah</th>
+                {% if is_central %}<th class="px-4 py-2 font-medium">Branch</th>{% endif %}
+                <th class="px-4 py-2 font-medium text-right">RKAS Terakhir</th>
+                <th class="px-4 py-2 font-medium">Rekonsiliasi</th>
+                <th class="px-4 py-2 font-medium text-right">Temuan Terbuka</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in monitoring_rows %}
+            <tr>
+                <td class="px-4 py-2 font-medium text-ink">{{ row.school.name }}</td>
+                {% if is_central %}<td class="px-4 py-2 text-muted">{{ row.school.branch.name }}</td>{% endif %}
+                <td class="px-4 py-2 text-right tabular-nums">
+                    {% if row.rkas %}
+                    <a href="{% url 'rkas:detail' row.rkas.pk %}" class="link">{{ row.rkas.current_amount|rupiah }}</a>
+                    {% else %}
+                    &ndash;
+                    {% endif %}
+                </td>
+                <td class="px-4 py-2">
+                    {% if row.reconciliation %}
+                        {% if row.reconciliation.status == "SESUAI" %}
+                        {% status_badge "Sesuai" "success" %}
+                        {% else %}
+                        {% status_badge "Tidak Sesuai" "danger" %}
+                        {% endif %}
+                    {% else %}
+                    &ndash;
+                    {% endif %}
+                </td>
+                <td class="px-4 py-2 text-right tabular-nums">
+                    {% if row.open_findings_count %}
+                    <a href="{% url 'findings:list' %}" class="link">{{ row.open_findings_count }}</a>
+                    {% else %}
+                    0
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td class="table-empty" colspan="{% if is_central %}5{% else %}4{% endif %}">Tidak ada sekolah yang cocok dengan filter ini.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "components/navigation/pagination.html" %}
+
+{% include "components/feedback/alert.html" with tone="warning" title="Perhatian" message="Status risiko (Hijau/Kuning/Oranye/Merah) belum ditentukan oleh bisnis -- belum ada field risiko atau formula skoring pada dokumen desain saat ini (OBD-DM-005), sehingga tidak ditampilkan di sini." %}
+{% endblock %}

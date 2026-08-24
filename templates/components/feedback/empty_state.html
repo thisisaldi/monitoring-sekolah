@@ -1,0 +1,24 @@
+{% comment %}
+EmptyState primitive -- standalone (non-table) empty state. Table empty
+rows use the lighter inline `.table-empty` <tr> pattern instead (see
+UI-DESIGN-SPEC.md); this component is for a page/section with no table
+around it.
+
+Usage:
+    {% include "components/feedback/empty_state.html" with title="Belum ada data RKAS" description="Data akan muncul setelah cabang mengisi RKAS." action_label="Tambah RKAS" action_url=create_url %}
+
+Params:
+    title          (required)
+    description    optional supporting sentence
+    action_label   optional -- only render the action if the user is permitted (caller decides)
+    action_url
+{% endcomment %}
+<div class="panel-padded text-center">
+    <p class="text-sm font-medium text-ink">{{ title }}</p>
+    {% if description %}<p class="mt-1 text-sm text-muted">{{ description }}</p>{% endif %}
+    {% if action_label and action_url %}
+    <div class="mt-4">
+        <a href="{{ action_url }}" class="btn-primary">{{ action_label }}</a>
+    </div>
+    {% endif %}
+</div>

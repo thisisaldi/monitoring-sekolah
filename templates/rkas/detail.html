@@ -1,0 +1,69 @@
+{% extends "base/base.html" %}
+{% load monitoring_extras %}
+
+{% block title %}RKAS &mdash; {{ rkas.school.name }} | Monitoring Keuangan Sekolah{% endblock %}
+{% block page_heading %}{{ rkas.school.name }} &mdash; {{ rkas.budget_year.name }}{% endblock %}
+
+{% block content %}
+{% url 'rkas:edit' rkas.pk as edit_url %}
+{% url 'rkas:revision_create' rkas.pk as revision_url %}
+<div class="page-header-row">
+    <div>
+        <h2 class="page-title">{{ rkas.school.name }}</h2>
+        <p class="page-description">RKAS &mdash; {{ rkas.budget_year.name }}</p>
+    </div>
+    {% if can_modify %}
+    <div class="flex items-center gap-3">
+        <a href="{{ edit_url }}" class="link">Ubah</a>
+        {% include "components/primitives/button.html" with label="Tambah Revisi" href=revision_url %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="panel p-6 mb-6">
+    <div class="border-l-2 border-l-primary/30 pl-4 mb-5">
+        <div class="eyebrow">RKAS Terakhir (kalkulasi)</div>
+        <div class="mt-1 text-2xl font-semibold tabular-nums text-primary">{{ rkas.current_amount|rupiah }}</div>
+    </div>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+        <div>
+            <div class="eyebrow">RKAS Awal</div>
+            <div class="mt-1 tabular-nums text-ink">{{ rkas.initial_amount|rupiah }}</div>
+        </div>
+        <div>
+            <div class="eyebrow">Tanggal Pengesahan</div>
+            <div class="mt-1 text-ink">{{ rkas.initial_approval_date|default:"-" }}</div>
+        </div>
+        <div class="col-span-2">
+            <div class="eyebrow">Perubahan Utama</div>
+            <div class="mt-1 text-ink">{{ rkas.major_change_description|default:"-" }}</div>
+        </div>
+    </div>
+</div>
+
+<h2 class="section-title mb-3">Riwayat Revisi</h2>
+<div class="table-wrap">
+    <table class="table-base">
+        <thead>
+            <tr>
+                <th class="px-4 py-2 font-medium">Revisi</th>
+                <th class="px-4 py-2 font-medium text-right">Jumlah</th>
+                <th class="px-4 py-2 font-medium">Tanggal</th>
+                <th class="px-4 py-2 font-medium">Keterangan</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for revision in revisions %}
+            <tr>
+                <td class="px-4 py-2">{{ revision.revision_number }}</td>
+                <td class="px-4 py-2 text-right tabular-nums">{{ revision.amount|rupiah }}</td>
+                <td class="px-4 py-2 text-muted">{{ revision.revision_date }}</td>
+                <td class="px-4 py-2">{{ revision.change_description|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td class="table-empty" colspan="4">Belum ada revisi.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

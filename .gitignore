@@ -1,0 +1,61 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Build
+dist/
+build/
+.next/
+out/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Database
+*.sqlite
+*.sqlite3
+
+# Temporary
+tmp/
+temp/
+
+# Coverage
+coverage/
+.coverage
+htmlcov/
+
+# Testing
+.pytest_cache/
+
+# Django
+staticfiles/
+media/
+
+# Tailwind standalone CLI binary
+tailwindcss
+tailwindcss.exe
+
+# Generated files
+*.generated.*
+
+# Secrets
+*.pem
+*.key

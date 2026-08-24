@@ -1,0 +1,54 @@
+{% extends "base/base.html" %}
+{% load monitoring_extras %}
+
+{% block title %}Rekonsiliasi | Monitoring Keuangan Sekolah{% endblock %}
+{% block page_heading %}Rekonsiliasi{% endblock %}
+
+{% block content %}
+{% url 'reconciliation:create' as create_url %}
+<div class="page-header-row">
+    {% include "components/layout/page_header.html" with title="Rekonsiliasi" description="Rekonsiliasi saldo laporan keuangan dengan saldo bank." %}
+    {% if is_branch %}
+    {% include "components/primitives/button.html" with label="Tambah Rekonsiliasi" href=create_url %}
+    {% endif %}
+</div>
+
+<div class="table-wrap">
+    <table class="table-base">
+        <thead>
+            <tr>
+                <th class="px-4 py-2 font-medium">Sekolah</th>
+                <th class="px-4 py-2 font-medium">Tahun Anggaran</th>
+                <th class="px-4 py-2 font-medium text-right">Saldo Laporan</th>
+                <th class="px-4 py-2 font-medium text-right">Saldo Bank</th>
+                <th class="px-4 py-2 font-medium text-right">Selisih (kalkulasi)</th>
+                <th class="px-4 py-2 font-medium">Status (kalkulasi)</th>
+                <th class="px-4 py-2 font-medium">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in page_obj %}
+            <tr>
+                <td class="px-4 py-2 font-medium text-ink">{{ item.school.name }}</td>
+                <td class="px-4 py-2 text-muted">{{ item.budget_year.name }}</td>
+                <td class="px-4 py-2 text-right tabular-nums">{{ item.financial_statement_balance|rupiah }}</td>
+                <td class="px-4 py-2 text-right tabular-nums">{{ item.bank_balance|rupiah }}</td>
+                <td class="px-4 py-2 text-right tabular-nums">{{ item.difference|rupiah }}</td>
+                <td class="px-4 py-2">
+                    {% if item.status == "SESUAI" %}
+                    {% status_badge "Sesuai" "success" %}
+                    {% else %}
+                    {% status_badge "Tidak Sesuai" "danger" %}
+                    {% endif %}
+                </td>
+                <td class="px-4 py-2"><a href="{% url 'reconciliation:edit' item.pk %}" class="link">Ubah</a></td>
+            </tr>
+            {% empty %}
+            <tr><td class="table-empty" colspan="7">Belum ada data rekonsiliasi.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "components/navigation/pagination.html" %}
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base/base.html" %}
+{% load monitoring_extras %}
+
+{% block title %}Temuan | Monitoring Keuangan Sekolah{% endblock %}
+{% block page_heading %}Temuan &amp; Tindak Lanjut{% endblock %}
+
+{% block content %}
+{% url 'findings:create' as create_url %}
+<div class="page-header-row">
+    {% include "components/layout/page_header.html" with title="Temuan & Tindak Lanjut" description="Temuan audit dan status tindak lanjutnya." %}
+    {% if is_branch %}
+    {% include "components/primitives/button.html" with label="Tambah Temuan" href=create_url %}
+    {% endif %}
+</div>
+
+<div class="table-wrap">
+    <table class="table-base">
+        <thead>
+            <tr>
+                <th class="px-4 py-2 font-medium">Tanggal</th>
+                <th class="px-4 py-2 font-medium">Sekolah</th>
+                <th class="px-4 py-2 font-medium">Temuan</th>
+                <th class="px-4 py-2 font-medium">PIC</th>
+                <th class="px-4 py-2 font-medium">Deadline</th>
+                <th class="px-4 py-2 font-medium">Status</th>
+                <th class="px-4 py-2 font-medium">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in page_obj %}
+            <tr>
+                <td class="px-4 py-2 text-muted">{{ item.finding_date }}</td>
+                <td class="px-4 py-2 font-medium text-ink">{{ item.school.name }}</td>
+                <td class="px-4 py-2">{{ item.finding|truncatechars:60 }}</td>
+                <td class="px-4 py-2">{{ item.pic }}</td>
+                <td class="px-4 py-2 text-muted">{{ item.deadline }}</td>
+                <td class="px-4 py-2">
+                    {% if item.status == "COMPLETED" %}
+                    {% status_badge "Selesai" "success" %}
+                    {% elif item.status == "ON_PROGRESS" %}
+                    {% status_badge "Proses" "warning" %}
+                    {% else %}
+                    {% status_badge "Terbuka" "neutral" %}
+                    {% endif %}
+                </td>
+                <td class="px-4 py-2"><a href="{% url 'findings:edit' item.pk %}" class="link">Ubah</a></td>
+            </tr>
+            {% empty %}
+            <tr><td class="table-empty" colspan="7">Belum ada data temuan.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "components/navigation/pagination.html" %}
+{% endblock %}

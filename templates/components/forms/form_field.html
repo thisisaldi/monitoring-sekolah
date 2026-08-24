@@ -1,0 +1,27 @@
+{% comment %}
+FormField composed component: Label + widget + help text + error, for a
+single Django BoundField. Use when a form is laid out field-by-field
+(instead of {{ form.as_p }}) to get the section-50 "one coherent form"
+layout. The widget itself (Input/Textarea/Select) still gets its base
+visual treatment from the global `@layer base` rules in
+tailwind/input.css -- this component only adds the label/help/error
+scaffolding around it.
+
+Usage:
+    {% include "components/forms/form_field.html" with field=form.name label="Nama Sekolah" help_text="Nama resmi sekolah." %}
+
+Params:
+    field       (required) a Django BoundField, e.g. form.name
+    label       (required) visible label text
+    help_text   optional secondary text shown under the widget
+{% endcomment %}
+<div class="mb-4">
+    <label for="{{ field.id_for_label }}" class="mb-1 block text-sm font-medium text-ink">{{ label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}</label>
+    {{ field }}
+    {% if help_text %}<p class="mt-1 text-xs text-muted">{{ help_text }}</p>{% endif %}
+    {% if field.errors %}
+    <ul class="mt-1 mb-0 list-none space-y-0.5 text-xs text-danger">
+        {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+</div>

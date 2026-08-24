@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Monitoring Keuangan Sekolah{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <script type="module" src="{% static 'js/components/sidebar.js' %}"></script>
+    <script type="module" src="{% static 'js/components/select.js' %}"></script>
+    <script type="module" src="{% static 'js/components/dropdown.js' %}"></script>
+    <script type="module" src="{% static 'js/components/dialog.js' %}"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-canvas text-ink min-h-screen">
+{% if user.is_authenticated %}
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside id="app-sidebar" class="hidden md:flex md:flex-col w-60 shrink-0 border-r border-hairline bg-surface">
+            <div class="h-14 flex items-center px-4 border-b border-hairline">
+                <a href="{% url 'accounts:landing' %}" class="flex items-center gap-2.5">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-primary text-xs font-semibold text-white">MS</span>
+                    <span class="leading-tight">
+                        <span class="block text-[11px] font-semibold uppercase tracking-wider text-muted">Monitoring</span>
+                        <span class="block text-sm font-semibold text-ink -mt-0.5">Sekolah</span>
+                    </span>
+                </a>
+            </div>
+            <nav class="flex-1 overflow-y-auto py-4 px-2 text-sm" aria-label="Navigasi utama">
+                <div class="mb-1 px-3 eyebrow">Monitoring</div>
+                <a href="{% url 'dashboard:index' %}"
+                   {% if request.resolver_match.app_name == 'dashboard' %}aria-current="page"{% endif %}
+                   class="block rounded px-3 py-1.5 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'dashboard' %}bg-canvas text-ink border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">
+                    Dashboard
+                </a>
+
+                <div class="mt-4 mb-1 px-3 eyebrow">Master Data</div>
+                <a href="{% url 'branches:list' %}" {% if request.resolver_match.app_name == 'branches' %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'branches' %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">Branch</a>
+                <a href="{% url 'schools:list' %}" {% if request.resolver_match.app_name == 'schools' %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'schools' %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">Sekolah</a>
+                <a href="{% url 'budget_years:list' %}" {% if request.resolver_match.app_name == 'budget_years' %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'budget_years' %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">Tahun Anggaran</a>
+
+                <div class="mt-4 mb-1 px-3 eyebrow">Keuangan</div>
+                <a href="{% url 'rkas:list' %}" {% if request.resolver_match.app_name == 'rkas' %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'rkas' %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">RKAS</a>
+                <a href="{% url 'realizations:monthly_list' %}" {% if request.resolver_match.app_name == 'realizations' and 'monthly' in request.path %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'realizations' and 'monthly' in request.path %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">Realisasi Bulanan</a>
+                <a href="{% url 'realizations:semester_list' %}" {% if request.resolver_match.app_name == 'realizations' and 'semester' in request.path %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'realizations' and 'semester' in request.path %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">Realisasi Semester</a>
+                <a href="{% url 'bos:list' %}" {% if request.resolver_match.app_name == 'bos' %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'bos' %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">BOS</a>
+                <a href="{% url 'receivables:list' %}" {% if request.resolver_match.app_name == 'receivables' %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'receivables' %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">Piutang</a>
+                <a href="{% url 'reconciliation:list' %}" {% if request.resolver_match.app_name == 'reconciliation' %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'reconciliation' %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">Rekonsiliasi</a>
+
+                <div class="mt-4 mb-1 px-3 eyebrow">Pengawasan</div>
+                <a href="{% url 'findings:list' %}" {% if request.resolver_match.app_name == 'findings' %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'findings' %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">Temuan &amp; Tindak Lanjut</a>
+            </nav>
+            <div class="border-t border-hairline p-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary" aria-hidden="true">{{ user.name|slice:":1" }}</span>
+                    <div class="min-w-0">
+                        <div class="truncate text-xs font-medium text-ink">{{ user.name }}</div>
+                        <div class="truncate text-[11px] text-muted">{% if user.role == "CENTRAL" %}Pusat &middot; Semua Cabang{% else %}Cabang &middot; {{ user.branch.name }}{% endif %}</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile sidebar (hidden by default, toggled by button below) -->
+        <aside id="app-sidebar-mobile" class="hidden fixed inset-0 z-40 md:hidden">
+            <div class="absolute inset-0 bg-ink/40" data-sidebar-close></div>
+            <div class="relative z-10 flex h-full w-64 flex-col bg-surface border-r border-hairline">
+                <div class="h-14 flex items-center justify-between px-4 border-b border-hairline">
+                    <span class="text-sm font-semibold text-ink">Menu</span>
+                    <button type="button" data-sidebar-close class="text-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded" aria-label="Tutup menu">&times;</button>
+                </div>
+                <nav class="flex-1 overflow-y-auto py-4 px-2 text-sm" aria-label="Navigasi utama (mobile)">
+                    <a href="{% url 'dashboard:index' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Dashboard</a>
+                    <div class="mt-4 mb-1 px-3 eyebrow">Master Data</div>
+                    <a href="{% url 'branches:list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Branch</a>
+                    <a href="{% url 'schools:list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Sekolah</a>
+                    <a href="{% url 'budget_years:list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Tahun Anggaran</a>
+                    <div class="mt-4 mb-1 px-3 eyebrow">Keuangan</div>
+                    <a href="{% url 'rkas:list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">RKAS</a>
+                    <a href="{% url 'realizations:monthly_list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Realisasi Bulanan</a>
+                    <a href="{% url 'realizations:semester_list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Realisasi Semester</a>
+                    <a href="{% url 'bos:list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">BOS</a>
+                    <a href="{% url 'receivables:list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Piutang</a>
+                    <a href="{% url 'reconciliation:list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Rekonsiliasi</a>
+                    <div class="mt-4 mb-1 px-3 eyebrow">Pengawasan</div>
+                    <a href="{% url 'findings:list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Temuan &amp; Tindak Lanjut</a>
+                </nav>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col min-w-0">
+            <header class="h-14 flex items-center justify-between border-b border-hairline bg-surface px-4">
+                <div class="flex items-center gap-3 min-w-0">
+                    <button type="button" id="app-sidebar-toggle" class="md:hidden text-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded" aria-label="Buka menu" aria-controls="app-sidebar-mobile" aria-expanded="false">
+                        <span aria-hidden="true">&#9776;</span>
+                    </button>
+                    <div class="min-w-0">
+                        <h1 class="text-sm font-semibold text-ink truncate">{% block page_heading %}{% endblock %}</h1>
+                    </div>
+                </div>
+                <form method="post" action="{% url 'accounts:logout' %}" class="flex items-center gap-3">
+                    {% csrf_token %}
+                    <span class="hidden sm:flex items-center gap-1.5 rounded-full bg-canvas px-3 py-1 text-xs text-muted">
+                        <span class="font-medium text-ink">{{ user.name }}</span>
+                        <span aria-hidden="true">&middot;</span>
+                        {% if user.role == "CENTRAL" %}Pusat &middot; Semua Cabang{% else %}Cabang {{ user.branch.name }}{% if user.branch.school %} &middot; {{ user.branch.school.name }}{% endif %}{% endif %}
+                    </span>
+                    <button type="submit" class="link-muted text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded-sm">Keluar</button>
+                </form>
+            </header>
+
+            <main id="main-content" class="flex-1 min-w-0 px-4 py-6">
+{% else %}
+    <main class="min-h-screen flex items-center justify-center px-4">
+{% endif %}
+                {% include "components/_messages.html" %}
+                {% block content %}{% endblock %}
+{% if user.is_authenticated %}
+            </main>
+        </div>
+    </div>
+{% else %}
+    </main>
+{% endif %}
+</body>
+</html>

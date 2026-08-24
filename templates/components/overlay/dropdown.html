@@ -1,0 +1,44 @@
+{% comment %}
+Dropdown primitive -- action menu opened from a trigger (e.g. "•••" row
+actions). See static/js/components/dropdown.js for behavior.
+
+Usage:
+    {% include "components/overlay/dropdown.html" with id="school-actions-3" trigger_label="Aksi" items=school_actions %}
+
+    where `items` is a list of dicts, each either:
+        {"label": "Ubah", "url": "..."}                      -- a link item
+        {"label": "Nonaktifkan", "url": "...", "danger": True, "post": True}  -- a POST-submitting form item
+    Pass csrf_token in context for any "post": True item.
+
+Params:
+    id             (required) unique id for this instance
+    trigger_label  accessible name for the "•••" trigger button
+    items          (required) list of item dicts as above
+{% endcomment %}
+<div class="ui-dropdown" data-ui-dropdown>
+    <button type="button"
+            id="{{ id }}-trigger"
+            class="icon-btn"
+            data-ui-dropdown-trigger
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-label="{{ trigger_label|default:"Aksi" }}">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="3" r="1.3" fill="currentColor"/>
+            <circle cx="8" cy="8" r="1.3" fill="currentColor"/>
+            <circle cx="8" cy="13" r="1.3" fill="currentColor"/>
+        </svg>
+    </button>
+    <div class="ui-dropdown-menu" data-ui-dropdown-menu role="menu" aria-labelledby="{{ id }}-trigger" hidden>
+        {% for item in items %}
+        {% if item.post %}
+        <form method="post" action="{{ item.url }}" class="contents">
+            {% csrf_token %}
+            <button type="submit" role="menuitem" tabindex="-1" class="ui-dropdown-item{% if item.danger %} ui-dropdown-item-danger{% endif %}">{{ item.label }}</button>
+        </form>
+        {% else %}
+        <a href="{{ item.url }}" role="menuitem" tabindex="-1" class="ui-dropdown-item{% if item.danger %} ui-dropdown-item-danger{% endif %}">{{ item.label }}</a>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>

@@ -1,0 +1,16 @@
+{% comment %}
+FormActions composed component: the Batal/Simpan (or similar) row at the
+bottom of every create/edit form, aligned consistently across the app.
+
+Usage:
+    {% include "components/forms/form_actions.html" with cancel_url=cancel_url submit_label="Simpan" %}
+
+Params:
+    cancel_url     (required) href for the Batal link
+    cancel_label   text for the cancel link, default "Batal"
+    submit_label   text for the primary submit button, default "Simpan"
+{% endcomment %}
+<div class="mt-6 flex items-center gap-3">
+    <button type="submit" class="btn-primary">{{ submit_label|default:"Simpan" }}</button>
+    <a href="{{ cancel_url }}" class="link-muted">{{ cancel_label|default:"Batal" }}</a>
+</div>

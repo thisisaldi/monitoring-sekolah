@@ -1,0 +1,26 @@
+{% comment %}
+Button primitive.
+
+Usage:
+    {% include "components/primitives/button.html" with label="Simpan" variant="primary" type="submit" %}
+    {% include "components/primitives/button.html" with label="Batal" variant="ghost" href=cancel_url %}
+
+Params:
+    label     (required) visible text
+    variant   primary (default) | secondary | ghost | danger
+    size      md (default) | sm | lg
+    type      button (default) | submit  -- ignored when href is set
+    href      if set, renders an <a> instead of a <button>
+    disabled  truthy to disable
+    icon      optional raw inline SVG string (developer-authored only, never user data)
+    extra_class  optional additional utility classes (e.g. "w-full")
+{% endcomment %}
+{% if href %}
+<a href="{% if not disabled %}{{ href }}{% endif %}"
+   class="btn-{{ variant|default:"primary" }}{% if size == "sm" %} btn-sm{% elif size == "lg" %} btn-lg{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}"
+   {% if disabled %}aria-disabled="true" tabindex="-1"{% endif %}>{% if icon %}{{ icon|safe }}{% endif %}{{ label }}</a>
+{% else %}
+<button type="{{ type|default:"button" }}"
+        class="btn-{{ variant|default:"primary" }}{% if size == "sm" %} btn-sm{% elif size == "lg" %} btn-lg{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}"
+        {% if disabled %}disabled{% endif %}>{% if icon %}{{ icon|safe }}{% endif %}{{ label }}</button>
+{% endif %}

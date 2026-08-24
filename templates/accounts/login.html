@@ -1,0 +1,29 @@
+{% extends "base/base.html" %}
+
+{% block title %}Masuk | Monitoring Keuangan Sekolah{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-sm panel p-6">
+    <h1 class="mb-1 text-base font-semibold text-ink">Monitoring Keuangan Sekolah</h1>
+    <p class="mb-5 text-sm text-muted">Masuk untuk melanjutkan.</p>
+
+    {% if form.non_field_errors %}
+    {% for error in form.non_field_errors %}
+    {% include "components/feedback/alert.html" with tone="danger" message=error %}
+    {% endfor %}
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="mb-4">
+            {% include "components/primitives/label.html" with for_id=form.username.id_for_label text="Username" %}
+            {{ form.username }}
+        </div>
+        <div class="mb-5">
+            {% include "components/primitives/label.html" with for_id=form.password.id_for_label text="Password" %}
+            {{ form.password }}
+        </div>
+        {% include "components/primitives/button.html" with label="Masuk" type="submit" extra_class="w-full" %}
+    </form>
+</div>
+{% endblock %}
