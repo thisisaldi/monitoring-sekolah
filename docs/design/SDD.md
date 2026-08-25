@@ -664,6 +664,10 @@ The User model supports the following roles:
 - BRANCH
 
 The role must be explicitly assigned when creating a user. The system must not assume a default business role.
+
+### System administration privilege
+
+System administration (internal user management: create/edit users, activate/deactivate, reset passwords) is a separate concern from business role and is implemented using Django's built-in `is_staff` flag, not a business role value. `role=CENTRAL` does not by itself grant administrative access -- only `is_staff=True` does. `is_superuser` is not used for ordinary administration and is never grantable through the User Management UI. There is no public self-service registration; the first administrator is created via Django's standard superuser bootstrap process.
 ---
 
 # 13. Branch
