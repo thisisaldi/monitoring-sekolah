@@ -49,6 +49,11 @@
 
                 <div class="mt-4 mb-1 px-3 eyebrow">Pengawasan</div>
                 <a href="{% url 'findings:list' %}" {% if request.resolver_match.app_name == 'findings' %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'findings' %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">Temuan &amp; Tindak Lanjut</a>
+
+                {% if user.is_staff %}
+                <div class="mt-4 mb-1 px-3 eyebrow">Administrasi</div>
+                <a href="{% url 'accounts:user_list' %}" {% if request.resolver_match.url_name == 'user_list' or request.resolver_match.url_name == 'user_create' or request.resolver_match.url_name == 'user_edit' %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.url_name == 'user_list' or request.resolver_match.url_name == 'user_create' or request.resolver_match.url_name == 'user_edit' %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">Pengguna</a>
+                {% endif %}
             </nav>
             <div class="border-t border-hairline p-3">
                 <div class="flex items-center gap-2.5">
@@ -83,6 +88,10 @@
                     <a href="{% url 'reconciliation:list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Rekonsiliasi</a>
                     <div class="mt-4 mb-1 px-3 eyebrow">Pengawasan</div>
                     <a href="{% url 'findings:list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Temuan &amp; Tindak Lanjut</a>
+                    {% if user.is_staff %}
+                    <div class="mt-4 mb-1 px-3 eyebrow">Administrasi</div>
+                    <a href="{% url 'accounts:user_list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Pengguna</a>
+                    {% endif %}
                 </nav>
             </div>
         </aside>

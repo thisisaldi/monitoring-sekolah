@@ -21,6 +21,16 @@ def is_branch(user):
     return user.is_authenticated and user.role == Role.BRANCH
 
 
+def is_system_admin(user):
+    """
+    System administration privilege is deliberately separate from business
+    role (CENTRAL/BRANCH). `role=CENTRAL` does NOT imply admin access --
+    only `is_staff=True` does. See docs/design/SDD.md's system
+    administration section for the rationale.
+    """
+    return user.is_authenticated and user.is_staff
+
+
 def can_access_branch(user, branch):
     """
     CENTRAL may read any branch's scoped resources.
@@ -78,6 +88,23 @@ def require_branch(view_func):
     def wrapper(request, *args, **kwargs):
         if not is_branch(request.user):
             raise PermissionDenied("This view requires the BRANCH role.")
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
+
+def require_system_admin(view_func):
+    """
+    Anonymous -> redirected to login (via require_login).
+    Authenticated but not is_staff -> 403 (PermissionDenied).
+    is_staff=True -> allowed, regardless of business role.
+    """
+
+    @require_login
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not is_system_admin(request.user):
+            raise PermissionDenied("This view requires system administrator access.")
         return view_func(request, *args, **kwargs)
 
     return wrapper

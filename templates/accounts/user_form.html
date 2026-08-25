@@ -1,0 +1,62 @@
+{% extends "base/base.html" %}
+{% load monitoring_extras %}
+
+{% block title %}{{ title }} | Monitoring Keuangan Sekolah{% endblock %}
+{% block page_heading %}{{ title }}{% endblock %}
+
+{% block content %}
+{% url 'accounts:user_list' as cancel_url %}
+<div class="page-header-row">
+    {% include "components/layout/page_header.html" with title=title %}
+</div>
+
+<div class="panel-padded max-w-lg">
+    <h3 class="section-title pb-3 mb-4 border-b border-hairline">Informasi Pengguna</h3>
+    <form method="post">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <ul class="mb-4 rounded border border-danger-border bg-danger-bg px-3 py-2 text-sm text-danger list-none space-y-0.5">
+            {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+
+        {% include "components/forms/form_field.html" with field=form.name label="Nama" %}
+        {% include "components/forms/form_field.html" with field=form.username label="Username" %}
+
+        <div class="mb-4">
+            <label for="{{ form.role.id_for_label }}-trigger" class="mb-1 block text-sm font-medium text-ink">Role <span class="text-danger">*</span></label>
+            {% include "components/primitives/select.html" with id=form.role.id_for_label name=form.role.html_name placeholder="Pilih Role" options=role_options selected=form.role.value no_clear=True %}
+            {% if form.role.errors %}
+            <ul class="mt-1 mb-0 list-none space-y-0.5 text-xs text-danger">{% for error in form.role.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+            {% endif %}
+        </div>
+
+        <div class="mb-4">
+            <label for="{{ form.branch.id_for_label }}-trigger" class="mb-1 block text-sm font-medium text-ink">Branch</label>
+            {% include "components/primitives/select.html" with id=form.branch.id_for_label name=form.branch.html_name placeholder="Tidak ada (untuk role Pusat)" options=branches|as_select_options selected=form.branch.value %}
+            <p class="mt-1 text-xs text-muted">Wajib diisi untuk role Cabang. Sekolah otomatis mengikuti Branch yang dipilih (Branch dan Sekolah bersifat 1:1).</p>
+            {% if form.branch.errors %}
+            <ul class="mt-1 mb-0 list-none space-y-0.5 text-xs text-danger">{% for error in form.branch.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+            {% endif %}
+        </div>
+
+        {% if show_password_fields %}
+        {% include "components/forms/form_field.html" with field=form.password label="Password" %}
+        {% include "components/forms/form_field.html" with field=form.password_confirm label="Konfirmasi Password" %}
+        {% endif %}
+
+        <div class="mb-4 flex items-center gap-2">
+            {{ form.is_active }}
+            <label for="{{ form.is_active.id_for_label }}" class="text-sm text-ink">Aktif</label>
+            {% if is_self %}
+            <span class="text-xs text-muted">(akun Anda sendiri tidak dapat dinonaktifkan di sini)</span>
+            {% endif %}
+        </div>
+        {% if form.is_active.errors %}
+        <ul class="mt-1 mb-4 list-none space-y-0.5 text-xs text-danger">{% for error in form.is_active.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+        {% endif %}
+
+        {% include "components/forms/form_actions.html" with cancel_url=cancel_url %}
+    </form>
+</div>
+{% endblock %}
