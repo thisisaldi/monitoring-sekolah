@@ -30,10 +30,14 @@ class LoginViewTests(TestCase):
             {"username": "login.user", "password": "a-strong-password"},
         )
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse("accounts:landing"))
+        self.assertRedirects(response, reverse("dashboard:index"))
 
-        landing = client.get(reverse("accounts:landing"))
-        self.assertEqual(landing.status_code, 200)
+    def test_authenticated_get_to_login_redirects_to_dashboard(self):
+        """LoginView's redirect_authenticated_user, exercised end-to-end."""
+        client = Client()
+        client.login(username="login.user", password="a-strong-password")
+        response = client.get(reverse("accounts:login"))
+        self.assertRedirects(response, reverse("dashboard:index"))
 
     def test_failed_login_remains_on_login_page_with_generic_error(self):
         client = Client()
@@ -99,6 +103,30 @@ class LogoutViewTests(TestCase):
         response = client.get(reverse("accounts:landing"))
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("accounts:login"), response.url)
+
+
+class RootRoutingTests(TestCase):
+    """
+    Post-deployment root-routing correction: `/` (core:home) is a pure
+    auth-state redirect, never a rendered page. Anonymous case is covered
+    in tests/test_foundation.py::HomePageTests (no user setup needed there).
+    """
+
+    def setUp(self):
+        self.branch = Branch.objects.create(code="ROOT", name="Root Routing Branch")
+        self.user = User.objects.create_user(
+            username="root.user",
+            name="Root User",
+            password="a-strong-password",
+            role=User.Role.BRANCH,
+            branch=self.branch,
+        )
+
+    def test_authenticated_root_redirects_to_dashboard(self):
+        client = Client()
+        client.login(username="root.user", password="a-strong-password")
+        response = client.get(reverse("core:home"))
+        self.assertRedirects(response, reverse("dashboard:index"))
 
 
 class LandingPageTests(TestCase):

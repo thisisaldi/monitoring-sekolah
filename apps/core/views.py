@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.http import Http404, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.utils.safestring import mark_safe
 
 # Developer-authored inline icons for the component preview page only --
@@ -22,7 +22,14 @@ _ICON_DOTS = mark_safe(
 
 
 def home(request):
-    return render(request, "core/home.html")
+    """
+    Application root. Not a landing/marketing page -- routes straight to
+    the authenticated entry point (dashboard) or to login, per the
+    post-deployment root-routing correction.
+    """
+    if request.user.is_authenticated:
+        return redirect("dashboard:index")
+    return redirect("accounts:login")
 
 
 def ui_preview(request):

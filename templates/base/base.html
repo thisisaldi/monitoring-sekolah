@@ -36,7 +36,6 @@
                 </a>
 
                 <div class="mt-4 mb-1 px-3 eyebrow">Master Data</div>
-                <a href="{% url 'branches:list' %}" {% if request.resolver_match.app_name == 'branches' %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'branches' %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">Branch</a>
                 <a href="{% url 'schools:list' %}" {% if request.resolver_match.app_name == 'schools' %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'schools' %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">Sekolah</a>
                 <a href="{% url 'budget_years:list' %}" {% if request.resolver_match.app_name == 'budget_years' %}aria-current="page"{% endif %} class="block rounded px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 {% if request.resolver_match.app_name == 'budget_years' %}bg-canvas text-ink font-medium border-l-2 border-primary -ml-0.5 pl-3{% else %}text-ink/80 hover:bg-canvas{% endif %}">Tahun Anggaran</a>
 
@@ -73,7 +72,6 @@
                 <nav class="flex-1 overflow-y-auto py-4 px-2 text-sm" aria-label="Navigasi utama (mobile)">
                     <a href="{% url 'dashboard:index' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Dashboard</a>
                     <div class="mt-4 mb-1 px-3 eyebrow">Master Data</div>
-                    <a href="{% url 'branches:list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Branch</a>
                     <a href="{% url 'schools:list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Sekolah</a>
                     <a href="{% url 'budget_years:list' %}" class="block rounded px-3 py-1.5 text-ink/80 hover:bg-canvas">Tahun Anggaran</a>
                     <div class="mt-4 mb-1 px-3 eyebrow">Keuangan</div>

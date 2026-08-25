@@ -11,13 +11,16 @@ from django.urls import reverse
 
 
 class HomePageTests(TestCase):
-    def test_home_page_returns_200(self):
-        response = Client().get(reverse("core:home"))
-        self.assertEqual(response.status_code, 200)
+    """
+    Root routing correction (post-deployment): `/` is not a public/home
+    page -- it routes straight to the authenticated entry point. See
+    tests/test_authentication.py::RootRoutingTests for the authenticated
+    case (requires a logged-in user, set up there).
+    """
 
-    def test_home_page_uses_base_template(self):
+    def test_anonymous_root_redirects_to_login(self):
         response = Client().get(reverse("core:home"))
-        self.assertTemplateUsed(response, "base/base.html")
+        self.assertRedirects(response, reverse("accounts:login"))
 
 
 class HealthCheckTests(TestCase):
@@ -31,16 +34,17 @@ class HealthCheckTests(TestCase):
 
 
 class HtmxDemoTests(TestCase):
+    """
+    The `core:home` URL (`/`) no longer renders the HTMX demo page inline
+    (see HomePageTests) -- it's a pure auth-state redirect now. The
+    partial-returning endpoint itself is untouched and still verified here.
+    """
+
     def test_htmx_endpoint_returns_partial(self):
         response = Client().get(reverse("core:htmx_demo"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "core/partials/htmx_demo_result.html")
         self.assertNotContains(response, "<html")
-
-    def test_home_page_loads_htmx_script(self):
-        response = Client().get(reverse("core:home"))
-        self.assertContains(response, "htmx")
-        self.assertContains(response, "hx-get")
 
 
 class DatabaseConnectionTests(TestCase):
