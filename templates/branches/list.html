@@ -1,16 +1,14 @@
 {% extends "base/base.html" %}
 {% load monitoring_extras %}
 
-{% block title %}Branch | Monitoring Keuangan Sekolah{% endblock %}
-{% block page_heading %}Branch{% endblock %}
+{% block title %}Cabang | Monitoring Keuangan Sekolah{% endblock %}
+{% block page_heading %}Cabang{% endblock %}
 
 {% block content %}
 {% url 'branches:create' as branch_create_url %}
 <div class="page-header-row">
-    {% include "components/layout/page_header.html" with title="Branch" description="Data cabang/perwakilan sekolah." %}
-    {% if is_central %}
+    {% include "components/layout/page_header.html" with title="Cabang" description="Data cabang/perwakilan sekolah (administrasi sistem)." %}
     {% include "components/primitives/button.html" with label="Tambah Branch" href=branch_create_url %}
-    {% endif %}
 </div>
 
 <div class="table-wrap">
@@ -20,7 +18,7 @@
                 <th class="px-4 py-2 font-medium">Kode</th>
                 <th class="px-4 py-2 font-medium">Nama</th>
                 <th class="px-4 py-2 font-medium">Status</th>
-                {% if is_central %}<th class="px-4 py-2 font-medium">Aksi</th>{% endif %}
+                <th class="px-4 py-2 font-medium">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -35,7 +33,6 @@
                     {% status_badge "Tidak Aktif" "neutral" %}
                     {% endif %}
                 </td>
-                {% if is_central %}
                 <td class="px-4 py-2">
                     <div class="ui-dropdown" data-ui-dropdown>
                         <button type="button" id="branch-actions-{{ branch.pk }}-trigger" class="icon-btn" data-ui-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Aksi untuk {{ branch.name }}">
@@ -48,11 +45,15 @@
                                 {% csrf_token %}
                                 <button type="submit" role="menuitem" tabindex="-1" class="ui-dropdown-item ui-dropdown-item-danger">Nonaktifkan</button>
                             </form>
+                            {% else %}
+                            <form method="post" action="{% url 'branches:activate' branch.pk %}" class="contents">
+                                {% csrf_token %}
+                                <button type="submit" role="menuitem" tabindex="-1" class="ui-dropdown-item">Aktifkan</button>
+                            </form>
                             {% endif %}
                         </div>
                     </div>
                 </td>
-                {% endif %}
             </tr>
             {% empty %}
             <tr><td class="table-empty" colspan="4">Belum ada data branch.</td></tr>

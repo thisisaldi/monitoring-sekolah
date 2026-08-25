@@ -22,6 +22,14 @@
         {% include "components/forms/form_field.html" with field=form.code label="Kode Branch" %}
         {% include "components/forms/form_field.html" with field=form.name label="Nama Branch" %}
 
+        <div class="mb-4 flex items-center gap-2">
+            {{ form.is_active }}
+            <label for="{{ form.is_active.id_for_label }}" class="text-sm text-ink">Aktif</label>
+        </div>
+        {% if form.is_active.errors %}
+        <ul class="mt-1 mb-4 list-none space-y-0.5 text-xs text-danger">{% for error in form.is_active.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+        {% endif %}
+
         {% include "components/forms/form_actions.html" with cancel_url=cancel_url %}
     </form>
 </div>

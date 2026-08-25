@@ -3,11 +3,12 @@ from django.db import models
 
 class Branch(models.Model):
     """
-    Branch/perwakilan master data, per docs/design/DATABASE-SCHEMA.md section 9.
+    Branch/perwakilan, per docs/design/DATABASE-SCHEMA.md section 9.
 
-    Master data management (who may create/edit/deactivate branches) is an
-    open business decision (OBD-001) and is not addressed here. This model
-    only establishes the entity and its relationship to User.
+    Branch is an internal organizational/security entity, not user-facing
+    Master Data. Management (create/edit/activate/deactivate) is is_staff-only
+    system administration -- see apps/branches/views.py and
+    apps/accounts/authorization.py::is_system_admin.
     """
 
     code = models.CharField(max_length=50, unique=True)

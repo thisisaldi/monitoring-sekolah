@@ -1,10 +1,10 @@
 """
 Post-deployment correction: Master Data navigation no longer exposes
 Branch as a normal user-facing entity (Branch<->School is 1:1, so users
-work with School directly). The Branch model, its authorization role,
-and its URLs are untouched -- this only covers what the sidebar/dashboard
-render. See docs/design/UI-DESIGN-SPEC.md and the correction's own report
-for the full rationale.
+work with School directly). Branch management was subsequently moved to
+an is_staff-only ADMINISTRASI workflow (apps/branches/views.py), not a
+CENTRAL-accessible Master Data route. See docs/design/UI-DESIGN-SPEC.md
+and the corrections' own reports for the full rationale.
 """
 import datetime
 
@@ -59,11 +59,15 @@ class SidebarMasterDataNavigationTests(TestCase):
         response = client.get(reverse("schools:list"))
         self.assertNotContains(response, 'href="/branches/"')
 
-    def test_branches_route_still_works_directly_even_though_unlinked(self):
-        """The Branch model/CRUD page itself is preserved, just not navigated to."""
+    def test_branches_route_requires_system_admin_even_when_accessed_directly(self):
+        """
+        The Branch model/CRUD page is preserved but is now is_staff-only
+        (system administration), not a normal-CENTRAL master-data route --
+        see the ADMIN-ONLY BRANCH MANAGEMENT correction.
+        """
         client = self.login("nav.central")
         response = client.get(reverse("branches:list"))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
 
 
 class DashboardSelectorVisibilityTests(TestCase):
