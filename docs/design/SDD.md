@@ -120,9 +120,15 @@ These may be implemented in future versions.
 
 # 4. Architecture Decision
 
-The application will use a modular monolithic architecture.
+> **Stack change (2026-10):** the application was rewritten from Django to
+> Next.js. Business rules, data model, authorization and calculations are
+> unchanged; only the implementation technology changed. Sections in this
+> document that name Django, HTMX, Django templates, querysets or Gunicorn
+> describe the original implementation; the equivalent in the current code
+> is listed in section 8.
 
-The MVP will NOT use separately deployed frontend and backend applications.
+The system is a single full-stack web application. There is no separately
+deployed frontend and backend.
 
 Architecture:
 
@@ -130,398 +136,108 @@ Architecture:
        |
        | HTTPS
        v
-    Nginx
+    Next.js (App Router, server rendering + Server Actions)
        |
        v
-    Django Application
-       |
-       +----------------------+
-       |                      |
-       v                      v
-    PostgreSQL             Static Files
-       |
-       v
-    Persistent Storage
+    PostgreSQL (Supabase in production)
 
-Frontend rendering is handled by Django Templates.
-
-HTMX is used for partial page updates and interactive UI behavior.
-
-Tailwind CSS is used for styling.
+Pages are rendered on the server. Mutations go through Server Actions that
+re-check authentication and authorization on every call.
 
 ---
 
 # 5. Architecture Rationale
 
-The system is primarily a CRUD and monitoring application.
+The system is primarily a CRUD and monitoring application: forms, tables,
+filters, dashboards, role-based access, calculations and relational data.
 
-The major workflows are:
+A single Next.js application keeps:
 
-- forms;
-- tables;
-- filters;
-- dashboards;
-- CRUD operations;
-- role-based access;
-- calculations;
-- relational data.
+- one deployment;
+- one place for authentication and authorization;
+- server-side validation and calculation (never only in the browser);
+- direct database access from server code, with no public API to secure.
 
-The system does not currently require a highly stateful single-page application.
-
-Therefore a Django monolith provides:
-
-- simpler deployment;
-- simpler authentication;
-- simpler authorization;
-- simpler server-side validation;
-- simpler database access;
-- fewer infrastructure components;
-- lower operational complexity;
-- easier maintenance.
-
-HTMX provides interactive behavior without requiring a separate frontend application.
-
-If future requirements require a highly interactive frontend, an API layer can be introduced incrementally.
+PostgreSQL stays the database because the business rules are relational and
+are enforced as database constraints (unique per period, non-negative
+amounts, completed findings require a completion date).
 
 ---
 
 # 6. Technology Stack
 
-## 6.1 Backend
-
-Django
-
-Purpose:
-
-- application framework;
-- routing;
-- authentication;
-- ORM;
-- forms;
-- validation;
-- templating;
-- security;
-- management commands.
-
----
-
-## 6.2 Frontend
-
-Django Templates
-
-Purpose:
-
-- server-rendered HTML;
-- page structure;
-- forms;
-- tables;
-- dashboard.
-
----
-
-## 6.3 Interactive UI
-
-HTMX
-
-Purpose:
-
-- partial page updates;
-- modal forms;
-- filtering;
-- inline UI updates;
-- asynchronous form submission where useful.
-
-HTMX must not become a substitute for backend validation.
-
-All important business rules remain on the backend.
-
----
-
-## 6.4 CSS
-
-Tailwind CSS
-
-Purpose:
-
-- application layout;
-- responsive UI;
-- forms;
-- tables;
-- dashboard cards;
-- status indicators.
-
----
-
-## 6.5 Database
-
-PostgreSQL
-
-Purpose:
-
-- relational data storage;
-- constraints;
-- transactions;
-- indexing;
-- aggregation;
-- referential integrity.
-
----
-
-## 6.6 Web Server
-
-Nginx
-
-Responsibilities:
-
-- TLS termination;
-- static files;
-- reverse proxy;
-- request forwarding to Django;
-- basic security headers.
-
----
-
-## 6.7 Application Server
-
-Gunicorn
-
-Responsibilities:
-
-- running Django application processes;
-- handling production HTTP requests behind Nginx.
-
----
-
-## 6.8 Containerization
-
-Docker
-
-Docker Compose will orchestrate:
-
-- Django application;
-- PostgreSQL;
-- Nginx.
+- **Framework:** Next.js (App Router), React, TypeScript.
+- **UI:** Tailwind CSS v4, shadcn/ui components (Radix primitives), Phosphor icons, Geist font.
+- **Database:** PostgreSQL. Supabase in production; any PostgreSQL works.
+- **ORM / migrations:** Drizzle ORM and drizzle-kit (`drizzle/` holds the SQL migrations).
+- **Validation:** zod.
+- **Authentication:** database-backed sessions (httpOnly cookie, sha256-hashed token), Django-compatible PBKDF2 password hashes.
+- **Tests:** Vitest against PGlite (PostgreSQL compiled to WASM) running the real migrations.
+- **Hosting:** Vercel (see docs/deployment/DEPLOYMENT.md).
 
 ---
 
 # 7. High-Level Architecture
 
-    +-----------------------------+
-    |           Browser           |
-    |                             |
-    | Django HTML + HTMX          |
-    +--------------+--------------+
-                   |
-                 HTTPS
-                   |
-                   v
-    +-----------------------------+
-    |           Nginx             |
-    |                             |
-    | TLS / Static / Proxy        |
-    +--------------+--------------+
-                   |
-                   v
-    +-----------------------------+
-    |          Django             |
-    |                             |
-    | Authentication              |
-    | Authorization               |
-    | Views                       |
-    | Forms                       |
-    | Business Services           |
-    | Dashboard Queries           |
-    | ORM                         |
-    +--------------+--------------+
-                   |
-                   v
-    +-----------------------------+
-    |         PostgreSQL          |
-    +-----------------------------+
+    Request
+      -> page (Server Component) or Server Action
+      -> guard: requireUser / requireCentral / requireBranch / requireAdmin
+      -> service (src/server/*): validation, scope checks, queries
+      -> calculation (src/lib/calc.ts)
+      -> PostgreSQL
 
 ---
 
 # 8. Application Structure
 
-The source code should be organized by business domain.
+    src/
+      app/                 routes (pages, layouts, Server Actions)
+        (auth)/login       login page
+        (app)/...          authenticated pages, one folder per module
+        health/route.ts    health check
+      components/
+        ui/                shadcn/ui primitives
+        app/               app-level components (shell, forms, tables)
+      db/                  Drizzle schema and client
+      lib/
+        auth/              sessions, password hashing, authorization helpers
+        calc.ts            all business calculations
+        money.ts           exact money arithmetic (bigint cents)
+        forms.ts           form parsing and validation helpers
+        format.ts          display formatting (Rupiah, dates, month names)
+      server/              services: one per module, all data access
+    drizzle/               SQL migrations
+    scripts/               import-schools, create-admin, seed-dev
+    test/                  Vitest tests
 
-Recommended structure:
+Django concept -> current equivalent:
 
-    school-financial-monitoring/
-    |
-    +-- config/
-    |   +-- settings/
-    |   +-- urls.py
-    |   +-- wsgi.py
-    |   +-- asgi.py
-    |
-    +-- apps/
-    |   +-- accounts/
-    |   +-- branches/
-    |   +-- schools/
-    |   +-- budget_years/
-    |   +-- rkas/
-    |   +-- realizations/
-    |   +-- bos/
-    |   +-- receivables/
-    |   +-- reconciliation/
-    |   +-- findings/
-    |   +-- dashboard/
-    |
-    +-- templates/
-    |   +-- base/
-    |   +-- components/
-    |   +-- accounts/
-    |   +-- schools/
-    |   +-- rkas/
-    |   +-- realizations/
-    |   +-- bos/
-    |   +-- receivables/
-    |   +-- reconciliation/
-    |   +-- findings/
-    |   +-- dashboard/
-    |
-    +-- static/
-    |   +-- css/
-    |   +-- js/
-    |   +-- images/
-    |
-    +-- tests/
-    |
-    +-- docs/
-    |
-    +-- manage.py
-    +-- Dockerfile
-    +-- docker-compose.yml
-    +-- .env.example
+| Original (Django) | Current (Next.js) |
+|---|---|
+| models.py + migrations | src/db/schema.ts + drizzle/ |
+| authorization.py | src/lib/auth/authz.ts, guards.ts |
+| views.py | src/app/(app)/**/page.tsx + actions.ts |
+| forms.py | zod schemas in src/server/* + EntityForm |
+| services.py / model properties | src/lib/calc.ts |
+| queryset scoping | branchScope() in src/server/common.ts |
+| Django messages | flash() cookie + toast |
+| createsuperuser | scripts/create-admin.ts |
+| management command import_schools | scripts/import-schools.ts |
 
 ---
 
-# 9. Django Application Responsibilities
+# 9. Module Responsibilities
 
-## 9.1 accounts
+Each module has one service file in src/server/ that owns its validation,
+scope checks and queries, and pages under src/app/(app)/:
 
-Responsibilities:
-
-- authentication;
-- login;
-- logout;
-- user role;
-- branch association;
-- authorization helpers.
-
----
-
-## 9.2 branches
-
-Responsibilities:
-
-- branch entity;
-- branch master data;
-- branch activation/deactivation.
-
----
-
-## 9.3 schools
-
-Responsibilities:
-
-- school entity;
-- school master data;
-- branch-school relationship;
-- school activation/deactivation.
-
----
-
-## 9.4 budget_years
-
-Responsibilities:
-
-- budget year;
-- start date;
-- end date;
-- active budget year.
-
----
-
-## 9.5 rkas
-
-Responsibilities:
-
-- RKAS;
-- RKAS revisions;
-- current RKAS calculation;
-- revision history.
-
----
-
-## 9.6 realizations
-
-Responsibilities:
-
-- monthly realization;
-- semester realization;
-- variance calculation;
-- realization percentage;
-- completeness status.
-
----
-
-## 9.7 bos
-
-Responsibilities:
-
-- BOS records;
-- BOS balance calculation;
-- BOS monitoring.
-
----
-
-## 9.8 receivables
-
-Responsibilities:
-
-- receivable records;
-- receivable balance calculation;
-- receivable monitoring.
-
----
-
-## 9.9 reconciliation
-
-Responsibilities:
-
-- reconciliation records;
-- difference calculation;
-- reconciliation monitoring.
-
----
-
-## 9.10 findings
-
-Responsibilities:
-
-- findings;
-- recommendations;
-- PIC;
-- deadline;
-- follow-up status.
-
----
-
-## 9.11 dashboard
-
-Responsibilities:
-
-- central dashboard;
-- branch dashboard;
-- aggregation queries;
-- completeness monitoring;
-- monitoring summaries.
-
-The dashboard app must not own operational financial data.
-
-It reads from other domain applications.
+- accounts/users: login, logout, user administration (is_staff only) - src/server/users.ts
+- branches, schools, budget years: master data - src/server/master.ts
+- RKAS and revisions - src/server/rkas.ts
+- monthly and semester realizations, semester summary - src/server/realizations.ts
+- BOS, receivables, reconciliation - src/server/annual.ts
+- findings - src/server/findings.ts
+- dashboard - src/server/dashboard.ts
 
 ---
 
@@ -715,11 +431,10 @@ Fields:
 Constraints:
 
     code UNIQUE
-    branch_id UNIQUE
 
 Relationship:
 
-    Branch 1:1 School
+    Branch 1:N School
 
 ---
 

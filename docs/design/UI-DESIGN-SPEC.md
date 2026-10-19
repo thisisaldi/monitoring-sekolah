@@ -1,5 +1,8 @@
 # UI Design Specification
 
+> **Stack change (2026-10):** the UI is now built with Next.js, Tailwind v4 and shadcn/ui. Design tokens live in src/app/globals.css (navy accent on slate neutrals, light and dark mode) and shared components in src/components/app/. References below to Django templates, template tags and HTMX describe the original implementation.
+
+
 ## 1. Purpose
 
 This document defines the visual and interaction design system for the School Financial Monitoring System.
@@ -288,7 +291,7 @@ No icons are used in the sidebar (see section 29) -- label text alone is clearer
 The top header bar is a compact **context bar**, not a second page title. It shows:
 
 - the current page name (left, from the `page_heading` block);
-- the authenticated user's name and scope (right): `{{ user.name }} · Cabang {{ user.branch.name }} · {{ user.branch.school.name }}` for a Branch user, or `{{ user.name }} · Pusat · Semua Cabang` for Central.
+- the authenticated user's name and scope (right): `{{ user.name }} · {{ user.branch.name }}` for a Branch user, or `{{ user.name }} · Pusat · Semua Cabang` for Central.
 
 A Branch user's header/sidebar footer never renders another branch's name -- the scope line is always derived from `request.user`, never from a query parameter (see section 36).
 
@@ -425,7 +428,7 @@ No charts are added -- none are justified by current requirements. No new KPIs, 
 
 A single bordered control bar (`.panel` wrapping a `<form method="get">`), each field labeled above the control, ending in an explicit `.btn-secondary` "Terapkan" button (selects also auto-submit on change for convenience; the button is there for users who prefer an explicit action and for keyboard/no-JS robustness).
 
-- **Branch users**: no Branch selector, no School selector -- their one school is inherent in the (already branch-scoped) monitoring table, so a selector offering 0-1 real choices is not shown at all. Only the Tahun Anggaran filter is offered.
+- **Branch users**: no Branch selector. School and Tahun Anggaran filters are offered; the School options are limited to their own branch's schools.
 - **Central users**: Branch, School, and Tahun Anggaran filters are all available, matching their full-access read-only scope.
 
 All filtering happens server-side in `apps/dashboard/views.py`; the template only ever renders options the view already scoped to the user (see section 36).

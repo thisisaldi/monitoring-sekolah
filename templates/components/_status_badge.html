@@ -1,7 +1,0 @@
-{% comment %}
-Domain wrapper around the generic Badge primitive (components/feedback/badge.html).
-Invoked via the `status_badge` inclusion tag -- see
-apps/core/templatetags/monitoring_extras.py. Kept as the single centralized
-status-display implementation across the app (see UI-DESIGN-SPEC.md).
-{% endcomment %}
-{% include "components/feedback/badge.html" with label=label tone=tone %}

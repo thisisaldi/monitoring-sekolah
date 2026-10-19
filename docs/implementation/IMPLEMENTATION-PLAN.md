@@ -1,5 +1,8 @@
 # Implementation Plan
 
+> **Stack change (2026-10):** the application was rewritten in Next.js (see docs/design/SDD.md sections 4-9). Phase steps that name Django, HTMX or Gunicorn describe the original implementation; the business scope and phase order still apply.
+
+
 # School Financial Monitoring System
 
 Version: 0.1

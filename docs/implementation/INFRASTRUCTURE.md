@@ -1,5 +1,8 @@
 # Infrastructure
 
+> **Stack change (2026-10):** the application is now a Next.js app on Vercel with a Supabase PostgreSQL database. The current deployment is described in docs/deployment/DEPLOYMENT.md. Sections below about a VPS, Nginx, Gunicorn, Django and HTMX describe the original Django plan and are kept for history.
+
+
 # School Financial Monitoring System
 
 Version: 0.1
