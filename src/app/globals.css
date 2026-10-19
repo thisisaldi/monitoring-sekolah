@@ -158,12 +158,10 @@
     font-variant-numeric: tabular-nums;
   }
 }
-/* Sidebar scroll area: thin, themed, thumb only visible on hover. */
+/* Sidebar scroll area: still scrolls (wheel, touch, keyboard) but shows no scrollbar. */
 @utility scrollbar-sidebar {
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-  &:hover,
-  &:focus-within {
-    scrollbar-color: color-mix(in oklch, var(--sidebar-foreground) 30%, transparent) transparent;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
