@@ -1,63 +1,47 @@
-# Environment
-.env
-.env.*
-!.env.example
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Dependencies
-node_modules/
-.venv/
-venv/
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Python
-__pycache__/
-*.py[cod]
+# testing
+/coverage
 
-# Build
-dist/
-build/
-.next/
-out/
+# next.js
+/.next/
+/out/
 
-# IDE
-.vscode/
-.idea/
+# production
+/build
 
-# OS
+# misc
 .DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Database
-*.sqlite
-*.sqlite3
-
-# Temporary
-tmp/
-temp/
-
-# Coverage
-coverage/
-.coverage
-htmlcov/
-
-# Testing
-.pytest_cache/
-
-# Django
-staticfiles/
-media/
-
-# Tailwind standalone CLI binary
-tailwindcss
-tailwindcss.exe
-
-# Generated files
-*.generated.*
-
-# Secrets
 *.pem
-*.key
-.vercel
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
 .env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# local dev database
+.pglite
+
+# Vercel project link
+.vercel

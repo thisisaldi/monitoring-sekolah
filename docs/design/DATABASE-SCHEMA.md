@@ -1,5 +1,8 @@
 # Database Schema
 
+> **Stack change (2026-10):** the schema is now defined in src/db/schema.ts (Drizzle) with SQL migrations in drizzle/. Table and column names are unchanged. Mentions of Django models, related_name or querysets describe the original implementation.
+
+
 # School Financial Monitoring System
 
 Version: 0.1
@@ -261,6 +264,7 @@ Stores branch/perwakilan master data.
 | id | BIGINT | NO | auto | PK | Branch identifier |
 | code | VARCHAR(50) | NO | - | UNIQUE | Branch code |
 | name | VARCHAR(150) | NO | - | | Branch name |
+| type | VARCHAR(20) | NO | 'CABANG' | | CABANG, PERWAKILAN, or PP (Pengurus Pusat); peers, no hierarchy |
 | is_active | BOOLEAN | NO | TRUE | | Active status |
 | created_at | TIMESTAMPTZ | NO | now() | | Creation timestamp |
 | updated_at | TIMESTAMPTZ | NO | now() | | Last update timestamp |
@@ -287,7 +291,7 @@ Stores school master data.
 | Column | Type | Null | Default | Constraint | Description |
 |---|---|---:|---|---|---|
 | id | BIGINT | NO | auto | PK | School identifier |
-| branch_id | BIGINT | NO | - | FK, UNIQUE | Owning branch (one branch operates exactly one school) |
+| branch_id | BIGINT | NO | - | FK | Owning branch (a branch manages many schools) |
 | code | VARCHAR(50) | NO | - | UNIQUE | School code |
 | name | VARCHAR(200) | NO | - | | School name |
 | education_level | VARCHAR(50) | YES | NULL | | Education level |
@@ -303,12 +307,9 @@ Stores school master data.
 
     code UNIQUE
 
-    branch_id UNIQUE
-
     student_count >= 0
 
-Branch<->School is 1:1: `branch_id UNIQUE` prevents a branch from being
-assigned to more than one school.
+Branch<->School is 1:N.
 
 ## Foreign Key
 
@@ -1227,8 +1228,8 @@ The following rules must always hold.
 
 ## Rule 1
 
-Every school belongs to exactly one branch, and every branch operates
-at most one school (enforced by `schools.branch_id UNIQUE`).
+Every school belongs to exactly one branch; a branch may manage many
+schools.
 
 ## Rule 2
 
@@ -1507,7 +1508,7 @@ Use Django `related_name` consistently.
 
 Example:
 
-    branch.school
+    branch.schools.all()
 
     school.rkas.all()
 

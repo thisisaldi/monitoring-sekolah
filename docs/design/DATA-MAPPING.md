@@ -249,9 +249,9 @@ School
 
 ## 7.6 Branch Relationship
 
-School belongs to exactly one Branch, and each Branch operates exactly one School.
+School belongs to exactly one Branch; a Branch (Cabang/Perwakilan/PP) manages many Schools.
 
-    Branch 1:1 School
+    Branch 1:N School
 
 School contains:
 

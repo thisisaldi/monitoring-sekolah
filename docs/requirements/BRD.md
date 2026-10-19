@@ -194,19 +194,27 @@ Pusat bersifat read-only terhadap data operasional.
 
 # 7. Organizational Structure
 
-Setiap cabang/perwakilan mengelola tepat satu sekolah (hubungan Cabang:Sekolah bersifat 1:1).
+Setiap unit (Cabang, Perwakilan, atau PP) dapat mengelola banyak sekolah (hubungan Cabang:Sekolah bersifat 1:N). Satu sekolah hanya dimiliki satu unit pada satu waktu.
+
+Jenis unit:
+
+* **Cabang**;
+* **Perwakilan**;
+* **PP** (Pengurus Pusat Yayasan Hang Tuah) -- sekolah binaan langsung pengurus pusat.
+
+Cabang, Perwakilan, dan PP setara (tidak ada hierarki induk-anak di sistem): user Cabang tidak otomatis melihat sekolah milik Perwakilan.
 
 ```text
 Pusat
- ├── Cabang A ── Sekolah A
- ├── Cabang B ── Sekolah B
- └── Cabang C ── Sekolah C
+ ├── Cabang Jakarta ── SD Hang Tuah 1 Jakarta, SMP Hang Tuah 1 Jakarta, ...
+ ├── Perwakilan Cirebon ── TK Hang Tuah Cirebon
+ └── PP ── SMA Hang Tuah 1 Jakarta, ...
 ```
 
-> **Koreksi requirement:** Contoh sebelumnya menampilkan satu cabang dengan
-> beberapa sekolah (1:N). Ini telah dikoreksi menjadi 1:1 (satu cabang =
-> satu sekolah) sesuai keputusan bisnis terbaru. Lihat ERD.md/DATABASE-SCHEMA.md
-> untuk detail penerapan pada level database.
+> **Koreksi requirement:** Sempat dikoreksi menjadi 1:1, lalu dikembalikan
+> ke 1:N sesuai data riil (`docs/reference/LAPORAN CSR SIAKA.xlsx`, sheet
+> "Cab-Pwk-Satdik-21525"). Data awal diimpor dari
+> `docs/reference/branches_schools.csv` via `python manage.py import_schools`.
 
 Daftar sekolah merupakan master data yang telah ditentukan.
 

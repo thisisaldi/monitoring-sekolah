@@ -40,7 +40,12 @@ Central office monitors data.
 
 # 3. User Roles
 
-The system has two primary roles:
+The system has three roles: Admin, Central (Pusat) and Branch (Cabang).
+
+## Admin
+
+Admin can do everything Central can, plus manage users (including other
+admins) and branches. Admin cannot create or edit operational data either.
 
 ## Branch
 
@@ -181,7 +186,10 @@ Operational records should contain:
 - updated_at;
 - updated_by.
 
-Full field-level audit history is not required for MVP unless explicitly added to the SDD.
+Field-level audit history is implemented: every create/update/activate/
+deactivate, password change and login writes an `audit_logs` entry in the
+same transaction (old and new value per changed field, never passwords).
+Admin and Central can read it on the *Riwayat Aktivitas* page.
 
 ---
 

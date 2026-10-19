@@ -1,141 +1,54 @@
-# School Financial Monitoring System
+# Monitoring Keuangan Sekolah
 
-Web application for collecting and monitoring financial data from schools through branch representatives.
+Financial monitoring for schools under Yayasan Hang Tuah. Branch units
+(Cabang, Perwakilan, Pengurus Pusat) enter RKAS, realizations, BOS,
+receivables, reconciliations and findings for their schools; the central
+office monitors everything read-only.
 
-## Purpose
+- Requirements: [docs/requirements/BRD.md](docs/requirements/BRD.md)
+- Design: [docs/design/SDD.md](docs/design/SDD.md)
+- Deployment: [docs/deployment/DEPLOYMENT.md](docs/deployment/DEPLOYMENT.md)
+- Rules for AI-assisted work: [AI.md](AI.md)
 
-The system replaces spreadsheet-based data collection and monitoring with a centralized web application.
+## Stack
 
-## Users
+Next.js (App Router, Server Actions), TypeScript, PostgreSQL via Drizzle
+ORM, Tailwind CSS v4 + shadcn/ui, Vitest + PGlite.
 
-### Branch
+## Getting started
 
-Branches enter and update data for schools under their responsibility.
-
-### Central
-
-Central users monitor all branch and school data.
-
-## Main Modules
-
-- Master Sekolah
-- RKAS
-- Realisasi Bulanan
-- Realisasi Semester
-- BOS
-- Piutang
-- Rekonsiliasi
-- Temuan & Tindak Lanjut
-- Dashboard
-
-Only the project foundation (Phase 0/1 of `docs/implementation/IMPLEMENTATION-PLAN.md`) is implemented so far. None of the modules above exist yet.
-
-## Technology Stack
-
-- **Backend:** Django 5.2
-- **Database:** PostgreSQL 16
-- **Frontend:** Django Templates
-- **Interactive UI:** HTMX
-- **CSS:** Tailwind CSS 4 (standalone CLI, no Node.js required)
-- **Application server:** Gunicorn (production)
-- **Reverse proxy:** Nginx (production, not part of the MVP dev stack)
-- **Containerization:** Docker / Docker Compose
-
-## Development Prerequisites
-
-- Docker Desktop (or Docker Engine + Docker Compose plugin)
-
-No local Python or Node installation is required — everything runs in containers.
-
-## Environment Setup
-
-Copy the example environment file and adjust values if needed:
+Requires Node.js 20.9+.
 
 ```bash
-cp .env.example .env
+npm install
+npx pglite-server --db=./.pglite --port=5433 --max-connections=10   # local Postgres, separate terminal
+cp .env.example .env.local                                          # then check the values
+npm run db:migrate
+node scripts/import-schools.ts docs/reference/branches_schools.csv
+node scripts/create-admin.ts admin "Administrator Pusat" '<password>'
+node scripts/seed-dev.ts      # optional demo data: TA 2026/2027 + login jakarta / Cabang#2026
+npm run dev
 ```
 
-`.env` is git-ignored and must never contain real production secrets.
+## Commands
 
-## Running the Application
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Development server |
+| `npm test` | Service and calculation tests (PGlite, no database setup needed) |
+| `npm run typecheck` | TypeScript check |
+| `npm run lint` | ESLint |
+| `npm run db:generate -- --name <change>` | New migration after editing `src/db/schema.ts` |
+| `npm run db:migrate` | Apply migrations to `DATABASE_URL` |
 
-```bash
-docker compose up --build
-```
+## Roles
 
-This starts two services:
+| Role | Can |
+|---|---|
+| BRANCH (Cabang) | Enter and edit operational data for its own schools only |
+| CENTRAL (Pusat) | Read everything; manage schools and budget years; see the activity history; never edits operational data |
+| ADMIN | Everything CENTRAL can, plus manage users (including other admins) and branches. The first admin comes from `scripts/create-admin.ts` |
 
-- `db` — PostgreSQL 16, with a persistent volume
-- `web` — Django dev server on port 8000 (migrations run automatically on start)
-
-Then visit:
-
-- http://localhost:8000/ — home page
-- http://localhost:8000/health/ — health check (`{"status": "ok"}`)
-
-## Running Tests
-
-```bash
-docker compose exec web python manage.py test tests
-```
-
-## Static Files
-
-```bash
-docker compose exec web python manage.py collectstatic --noinput
-```
-
-## Tailwind CSS
-
-Tailwind is compiled with the standalone CLI (no Node.js/npm dependency). The
-source file is `tailwind/input.css`; the Docker build compiles it to
-`static/css/output.css` automatically.
-
-To rebuild CSS manually during local development (e.g. after adding new
-utility classes to templates), download the CLI for your platform from the
-[Tailwind releases page](https://github.com/tailwindlabs/tailwindcss/releases)
-and run:
-
-```bash
-tailwindcss -i ./tailwind/input.css -o ./static/css/output.css --minify
-```
-
-Then rebuild the `web` image (`docker compose up --build`) so the container
-picks up the new file, or copy the output into the running container.
-
-## Deployment
-
-Production deployment target is Vercel (free tier) with a Neon PostgreSQL
-database. See [`docs/deployment/DEPLOYMENT.md`](docs/deployment/DEPLOYMENT.md)
-for the full setup, environment variables, migration procedure, and
-free-tier limitations. Local Docker development (above) is unaffected.
-
-## Documentation
-
-### Requirements
-
-- `docs/requirements/BRD.md`
-- `docs/requirements/open-business-decisions.md`
-
-### Design
-
-- `docs/design/ERD.md`
-- `docs/design/SDD.md`
-- `docs/design/DATABASE-SCHEMA.md`
-
-### Implementation
-
-- `docs/implementation/IMPLEMENTATION-PLAN.md`
-
-### Reference
-
-- `docs/reference/`
-
-### AI Development Rules
-
-- `AI.md`
-
-## Development Status
-
-Phase 0 (Project Preparation) and Phase 1 (Project Foundation) complete.
-Authentication, RBAC, and business modules are not yet implemented.
+Every change and every login is written to the activity history (`audit_logs`,
+page *Riwayat Aktivitas*) with the old and new value of each changed field.
+Password values are never recorded.

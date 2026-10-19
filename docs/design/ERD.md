@@ -153,6 +153,7 @@ Fields:
 - `id`
 - `code`
 - `name`
+- `type` (CABANG / PERWAKILAN / PP)
 - `is_active`
 - `created_at`
 - `updated_at`
@@ -160,8 +161,9 @@ Fields:
 Example:
 
     id: 1
-    code: BDG
-    name: Bandung
+    code: CAB-JAKARTA
+    name: Cabang Jakarta
+    type: CABANG
     is_active: true
 
 Constraints:
@@ -173,7 +175,7 @@ Constraints:
 Relationship:
 
     Branch 1:N User
-    Branch 1:1 School
+    Branch 1:N School
 
 ---
 
@@ -200,16 +202,16 @@ Fields:
 
 Relationship:
 
-    Branch 1:1 School
+    Branch 1:N School
 
-A school belongs to exactly one branch, and a branch operates exactly one school.
+A school belongs to exactly one branch; a branch (Cabang/Perwakilan/PP) manages many schools.
 
 All operational financial records must reference `school_id`.
 
 Constraints:
 
 - `code` must be unique.
-- `branch_id` is required and unique (enforced at the database level: one branch may have at most one school).
+- `branch_id` is required.
 - `school_id` is the primary identifier for operational relationships.
 - School name must not be used as a foreign key.
 
