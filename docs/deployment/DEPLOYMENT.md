@@ -64,7 +64,7 @@ counts by code instead of creating duplicates.
 ## 5. Vercel project
 
 1. Import the Git repository in Vercel. Framework preset: Next.js. Root
-   directory: repository root. No `vercel.json` is needed.
+   directory: repository root. `vercel.json` only defines the keepalive cron (`/api/keepalive`, prevents Supabase free-tier pause after 7 idle days).
 2. Environment variables (Production and Preview):
 
 | Name | Value |
